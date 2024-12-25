@@ -2,7 +2,11 @@ import WeatherSkeleton from "@/components/loading-skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useGeoLocation } from "@/hooks/use-geolocation";
-
+import {
+  useForecastQuery,
+  useReverseGeocodeQuery,
+  useWeatherQuery,
+} from "@/hooks/useWeatherQuery";
 import { AlertCircle, MapPin, RefreshCcw } from "lucide-react";
 
 const WeatherDashboard = () => {
@@ -13,9 +17,15 @@ const WeatherDashboard = () => {
     isLoading: isLocationLoading,
   } = useGeoLocation();
 
+  const locationQuery = useReverseGeocodeQuery(coordinates);
+  const weatherQuery = useWeatherQuery(coordinates);
+  const forecastQuery = useForecastQuery(coordinates);
+
   const handleRefresh = () => {
     getLocation();
-    //reload weather data
+    locationQuery.refetch();
+    weatherQuery.refetch();
+    forecastQuery.refetch();
   };
 
   if (isLocationLoading) return <WeatherSkeleton />;
@@ -35,6 +45,47 @@ const WeatherDashboard = () => {
       </Alert>
     );
   }
+
+  if (locationError) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="w-4 h-4" />
+        <AlertTitle>Location required</AlertTitle>
+        <AlertDescription className="flex flex-col gap-4">
+          <p>
+            please add enable your location access to see your local weather
+          </p>
+          <Button variant={"outline"} className="w-fit" onClick={getLocation}>
+            <MapPin className="mr-2 size-4" />
+            Enable Location
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  const locationName = locationQuery.data?.[0];
+
+  if (weatherQuery.error || forecastQuery.error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="w-4 h-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription className="flex flex-col gap-4">
+          <p>failed to fetch data . please try again</p>
+          <Button variant={"outline"} className="w-fit" onClick={handleRefresh}>
+            <RefreshCcw className="size-4" />
+            retry
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!weatherQuery.data || !forecastQuery.data) {
+    return <WeatherSkeleton />;
+  }
+
   return (
     <div>
       {/* favorite cities */}
@@ -44,9 +95,13 @@ const WeatherDashboard = () => {
           variant={"outline"}
           size={"icon"}
           onClick={handleRefresh}
-          // disabled={}
+          disabled={weatherQuery.isFetching || forecastQuery.isFetching}
         >
-          <RefreshCcw className="size-4" />
+          <RefreshCcw
+            className={`size-4 ${
+              weatherQuery.isFetching ? "animate-spin" : ""
+            }`}
+          />
         </Button>
       </div>
     </div>
