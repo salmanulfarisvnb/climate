@@ -11,6 +11,7 @@ import { AlertCircle, MapPin, RefreshCcw } from "lucide-react";
 import CurrentWeather from "@/components/CurrentWeather";
 import HourlyTemperature from "@/components/HourlyTemperature";
 import WeatherDetails from "@/components/WeatherDetails";
+import WeatherForecast from "@/components/WeatherForecast";
 
 const WeatherDashboard = () => {
   const {
@@ -116,9 +117,9 @@ const WeatherDashboard = () => {
           />
           <HourlyTemperature data={forecastQuery.data} />
         </div>
-        <div>
+        <div className="grid items-start gap-6 lg:grid-cols-2">
           <WeatherDetails data={weatherQuery.data} />
-          {/* forecast */}
+          <WeatherForecast data={forecastQuery.data} />
         </div>
       </div>
     </div>
