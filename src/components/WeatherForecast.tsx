@@ -66,7 +66,7 @@ const WeatherForecast = ({ data }: WeatherForecastProps) => {
                   {day.weather.description}
                 </p>
               </div>
-              <div className="flex justify-center gap-4 text-sm">
+              <div className="flex justify-center gap-4 text-sm max-sm:hidden">
                 <span className="flex items-center gap-1 text-blue-500">
                   <ArrowDown className="size-4" />
                   {formatTemp(day.temp_min)}
